@@ -1,3 +1,123 @@
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+
+const initialDomains = [
+  {
+    id: "mands",
+    name: "Mands (Requesting)",
+    level: 1,
+    targets: [
+      { id: "m1", text: "Request a preferred item", score: 0, notes: "" },
+      { id: "m2", text: "Request help when needed", score: 0, notes: "" },
+    ],
+  },
+  {
+    id: "tacts",
+    name: "Tacts (Labeling)",
+    level: 1,
+    targets: [
+      { id: "t1", text: "Label 5 common objects", score: 0, notes: "" },
+      { id: "t2", text: "Label familiar people", score: 0, notes: "" },
+    ],
+  },
+  {
+    id: "listener",
+    name: "Listener Responding",
+    level: 1,
+    targets: [
+      { id: "l1", text: "Select named object from array", score: 0, notes: "" },
+      { id: "l2", text: "Respond to simple instructions", score: 0, notes: "" },
+    ],
+  },
+];
+
+export default function App() {
+  const [domains, setDomains] = useState(initialDomains);
+
+  const updateScore = (domainId, targetId, newScore) => {
+    setDomains((prev) =>
+      prev.map((domain) =>
+        domain.id === domainId
+          ? {
+              ...domain,
+              targets: domain.targets.map((t) =>
+                t.id === targetId ? { ...t, score: newScore } : t
+              ),
+            }
+          : domain
+      )
+    );
+  };
+
+  const updateNotes = (domainId, targetId, newNotes) => {
+    setDomains((prev) =>
+      prev.map((domain) =>
+        domain.id === domainId
+          ? {
+              ...domain,
+              targets: domain.targets.map((t) =>
+                t.id === targetId ? { ...t, notes: newNotes } : t
+              ),
+            }
+          : domain
+      )
+    );
+  };
+
+  const calcProgress = (domain) => {
+    const total = domain.targets.length;
+    const earned = domain.targets.reduce((a, t) => a + t.score, 0);
+    return (earned / total) * 100;
+  };
+
+  return (
+    <div className="p-6 grid gap-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold text-center">VB-MAPP Admin Tool</h1>
+      {domains.map((domain) => (
+        <Card key={domain.id} className="shadow-lg">
+          <CardContent className="p-4">
+            <h2 className="text-xl font-semibold mb-2">
+              {domain.name} (Level {domain.level})
+            </h2>
+            <Progress value={calcProgress(domain)} className="mb-4" />
+            <div className="grid gap-4">
+              {domain.targets.map((target) => (
+                <div
+                  key={target.id}
+                  className="p-3 border rounded-lg flex flex-col gap-2"
+                >
+                  <span className="font-medium">{target.text}</span>
+                  <div className="flex gap-2">
+                    {[0, 0.5, 1].map((s) => (
+                      <Button
+                        key={s}
+                        size="sm"
+                        variant={target.score === s ? "default" : "outline"}
+                        onClick={() => updateScore(domain.id, target.id, s)}
+                      >
+                        {s}
+                      </Button>
+                    ))}
+                  </div>
+                  <textarea
+                    className="border rounded p-2 text-sm"
+                    placeholder="Notes..."
+                    value={target.notes}
+                    onChange={(e) =>
+                      updateNotes(domain.id, target.id, e.target.value)
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
 ---
 id: getting-started
 title: Getting Started
